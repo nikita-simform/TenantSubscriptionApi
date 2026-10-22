@@ -1,0 +1,6 @@
+@TenantSubscriptionApi_HostAddress = http://localhost:5212
+
+GET {{TenantSubscriptionApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

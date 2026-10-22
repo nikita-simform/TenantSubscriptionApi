@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tenant_subscription_poc
+    # Remapped off the default 5432 — this dev machine already has a native
+    # Postgres bound to that port (same reason the reference implementation
+    # does this).
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: src/TenantSubscriptionApi/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      # "db" is the Postgres service's name on the Docker network — always port
+      # 5432 here regardless of the host-side remap above.
+      ConnectionStrings__Public: "Host=db;Port=5432;Database=tenant_subscription_poc;Username=postgres;Password=postgres"
+      ConnectionStrings__TenantBase: "Host=db;Port=5432;Database=tenant_subscription_poc;Username=postgres;Password=postgres;Maximum Pool Size=10"
+      Jwt__Secret: ${JWT_SECRET:?Set JWT_SECRET in your .env file}
+      Jwt__Issuer: TenantSubscriptionApi
+      Jwt__Audience: TenantSubscriptionApi
+      Jwt__ExpiryMinutes: "720"
+      SeedPlatformAdmin__Email: ${SEED_PLATFORM_ADMIN_EMAIL:?Set SEED_PLATFORM_ADMIN_EMAIL in your .env file}
+      SeedPlatformAdmin__Password: ${SEED_PLATFORM_ADMIN_PASSWORD:?Set SEED_PLATFORM_ADMIN_PASSWORD in your .env file}
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:
