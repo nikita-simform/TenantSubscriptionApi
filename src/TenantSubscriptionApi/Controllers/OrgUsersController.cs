@@ -30,6 +30,13 @@ public class OrgUsersController : ControllerBase
         _tenantContext = tenantContext;
     }
 
+    [HttpGet]
+    public async Task<ActionResult<List<OrgMemberSummary>>> ListMembers(Guid orgId)
+    {
+        var members = await _orgUserService.ListMembersAsync(_tenantContext.OrganizationId!.Value);
+        return Ok(members.Select(OrgMemberSummary.From));
+    }
+
     [HttpPost]
     public async Task<ActionResult<InviteResponse>> Invite(Guid orgId, InviteUserRequest request)
     {

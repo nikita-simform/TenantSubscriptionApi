@@ -68,3 +68,17 @@ isolation and concurrency tests is proving behavior against real Postgres semant
 `AuditLog` rows (shared `public` schema) are written for `org.onboarded`,
 `invite.limit_rejected`, and `user.cross_tenant_access_denied` — query them directly via
 `psql` for now; there's no dedicated endpoint.
+
+## Demo frontend
+
+A small React app (Vite) in `frontend/` exercises every feature above — signup, login,
+tenant-scoped resources, org member management (invite/remove/change role, with the seat
+limit visibly enforced), and the platform admin org list. See `frontend/README.md`.
+
+```bash
+cd src/TenantSubscriptionApi && dotnet run &     # API on :5100
+cd frontend && npm install && npm run dev        # UI on :5173
+```
+
+The seeded platform admin (`admin@platform.local` / `change-me-please`) logs straight into
+the Platform Admin view; sign up a new organization to see the OrgAdmin/OrgMember side.

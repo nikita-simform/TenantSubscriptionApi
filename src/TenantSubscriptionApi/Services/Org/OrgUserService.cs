@@ -22,6 +22,14 @@ public class OrgUserService
         _auditLogger = auditLogger;
     }
 
+    public async Task<List<Domain.Entities.User>> ListMembersAsync(Guid callerOrganizationId)
+    {
+        return await _publicDb.Users
+            .Where(u => u.OrganizationId == callerOrganizationId)
+            .OrderBy(u => u.Email)
+            .ToListAsync();
+    }
+
     public async Task RemoveUserAsync(Guid callerOrganizationId, Guid targetUserId)
     {
         var user = await FindScopedUserOrThrowAsync(callerOrganizationId, targetUserId);

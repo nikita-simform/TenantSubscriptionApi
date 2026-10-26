@@ -36,6 +36,20 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Dev-only: lets the React demo app (Vite dev server, a different origin) call this
+// API directly from the browser. Scoped to known local dev origins, not a wildcard.
+const string DevCorsPolicy = "DevCors";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(DevCorsPolicy, policy => policy
+        .WithOrigins(
+            "http://localhost:5173", "http://127.0.0.1:5173",
+            "http://localhost:3000", "http://127.0.0.1:3000",
+            "http://localhost:5174", "http://127.0.0.1:5174")
+        .AllowAnyHeader()
+        .AllowAnyMethod());
+});
+
 // Control-plane data (Organizations, Plans, Users, ...) — fixed connection, always "public" schema.
 builder.Services.AddDbContext<PublicDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Public")));
@@ -147,6 +161,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+if (app.Environment.IsDevelopment())
+    app.UseCors(DevCorsPolicy);
 
 app.UseAuthentication();
 app.UseAuthorization();
