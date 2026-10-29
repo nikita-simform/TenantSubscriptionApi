@@ -36,16 +36,20 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Dev-only: lets the React demo app (Vite dev server, a different origin) call this
-// API directly from the browser. Scoped to known local dev origins, not a wildcard.
-const string DevCorsPolicy = "DevCors";
+// Lets the React app (a different origin — the Vite dev server locally, a separate
+// Static Web App/Container App origin once deployed) call this API from the browser.
+// Origins come from config ("Cors:AllowedOrigins" in appsettings.json, overridable via
+// Cors__AllowedOrigins__0, __1, ... env vars) rather than being hardcoded, and this
+// applies in EVERY environment — CORS isn't a "dev convenience," it's required
+// whenever the frontend and API are served from different origins, which is true in
+// production here too (unlike same-origin setups where it'd never come up).
+const string CorsPolicy = "AppCors";
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? ["http://localhost:5173", "http://127.0.0.1:5173"];
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(DevCorsPolicy, policy => policy
-        .WithOrigins(
-            "http://localhost:5173", "http://127.0.0.1:5173",
-            "http://localhost:3000", "http://127.0.0.1:3000",
-            "http://localhost:5174", "http://127.0.0.1:5174")
+    options.AddPolicy(CorsPolicy, policy => policy
+        .WithOrigins(allowedOrigins)
         .AllowAnyHeader()
         .AllowAnyMethod());
 });
@@ -162,8 +166,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-if (app.Environment.IsDevelopment())
-    app.UseCors(DevCorsPolicy);
+app.UseCors(CorsPolicy);
 
 app.UseAuthentication();
 app.UseAuthorization();

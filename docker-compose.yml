@@ -5,11 +5,11 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: tenant_subscription_poc
-    # Remapped off the default 5432 — this dev machine already has a native
-    # Postgres bound to that port (same reason the reference implementation
-    # does this).
+    # Remapped off the default 5432 (a native Postgres already owns that port on
+    # this machine) AND off 5433 (the saas-tenant-poc reference project's own
+    # Dockerized Postgres already uses that one) — 5434 is free.
     ports:
-      - "5433:5432"
+      - "5434:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -37,8 +37,24 @@ services:
       Jwt__ExpiryMinutes: "720"
       SeedPlatformAdmin__Email: ${SEED_PLATFORM_ADMIN_EMAIL:?Set SEED_PLATFORM_ADMIN_EMAIL in your .env file}
       SeedPlatformAdmin__Password: ${SEED_PLATFORM_ADMIN_PASSWORD:?Set SEED_PLATFORM_ADMIN_PASSWORD in your .env file}
+      # The frontend container is what the BROWSER talks to, so it's the origin that
+      # needs to be allowed here — not a Docker-internal service name.
+      Cors__AllowedOrigins__0: "http://localhost:5174"
     ports:
       - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Baked into the JS bundle at build time — must be reachable from the
+        # BROWSER, hence the host-mapped port above, not "http://app:8080".
+        VITE_API_BASE_URL: "http://localhost:8080"
+    depends_on:
+      - app
+    ports:
+      - "5174:80"
 
 volumes:
   pgdata:

@@ -82,3 +82,15 @@ cd frontend && npm install && npm run dev        # UI on :5173
 
 The seeded platform admin (`admin@platform.local` / `change-me-please`) logs straight into
 the Platform Admin view; sign up a new organization to see the OrgAdmin/OrgMember side.
+
+## Deployment
+
+Two deployment paths are documented, both deliberately kept to the "basics" scope of this
+project (no Key Vault/Managed Identity/ECS-Fargate-grade hardening):
+
+- **Azure** (Container Apps + Azure Database for PostgreSQL) — see the conversation history
+  / implementation plan for the step-by-step `az` CLI walkthrough.
+- **AWS via LocalStack** (`deploy/localstack/`) — runs the API/Postgres exactly as above and
+  deploys the React build to a LocalStack-emulated S3 static website, entirely free on
+  LocalStack's Community edition (ECS Fargate and RDS backing engines are Pro-only features,
+  deliberately not used here). See `deploy/localstack/README.md`.

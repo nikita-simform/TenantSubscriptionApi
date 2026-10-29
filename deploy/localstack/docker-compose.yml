@@ -1,0 +1,22 @@
+services:
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"   # the single "edge" endpoint every AWS service API is reachable through
+    environment:
+      # Community edition — no LOCALSTACK_AUTH_TOKEN. ECS task execution and RDS
+      # database engines are Pro-only and deliberately NOT used here; this setup
+      # only relies on S3, which is fully free in Community.
+      SERVICES: s3
+      DEBUG: 0
+    volumes:
+      - "localstack_data:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"   # LocalStack's own internal requirement
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  localstack_data:
