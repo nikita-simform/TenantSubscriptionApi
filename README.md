@@ -1,6 +1,6 @@
 # TenantSubscriptionApi
 
-ASP.NET Core 8 + EF Core + PostgreSQL implementation of the multi-tenant subscription
+ASP.NET Core 10 + EF Core + PostgreSQL implementation of the multi-tenant subscription
 management POC spec (`~/Downloads/15-multi-tenant-subscription-management.md`), ported
 from an existing Next.js/Prisma reference implementation (`~/Documents/saas-tenant-poc`).
 
@@ -17,7 +17,7 @@ See the full design rationale in the implementation plan:
 
 ## Running locally (without Docker)
 
-Prerequisites: .NET 8 SDK, PostgreSQL 16 reachable at `localhost:5432` with a `postgres`/`postgres`
+Prerequisites: .NET 10 SDK, PostgreSQL 16 reachable at `localhost:5432` with a `postgres`/`postgres`
 superuser, databases `tenant_subscription_poc` and `tenant_subscription_poc_test` created.
 
 ```bash
